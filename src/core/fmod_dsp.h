@@ -25,6 +25,7 @@ namespace godot {
             return _wrapped;
         }
 
+        bool is_valid() const;
         void release() const;
         void set_parameter_int(int index, int value) const;
         int get_parameter_int(int index) const;
