@@ -3,6 +3,7 @@
 
 #include "classes/ref_counted.hpp"
 #include "fmod.hpp"
+#include "fmod_dsp.h"
 
 namespace godot {
     class FmodChannelGroup : public RefCounted {
@@ -23,6 +24,8 @@ namespace godot {
 
         uint64_t get_dsp_clock() const;
         uint64_t get_parent_dsp_clock() const;
+        void add_dsp(int index, const Ref<FmodDsp>& dsp) const;
+        void remove_dsp(const Ref<FmodDsp>& dsp) const;
 
     protected:
         static void _bind_methods();

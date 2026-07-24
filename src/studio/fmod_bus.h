@@ -3,6 +3,7 @@
 
 #include "fmod_studio.hpp"
 #include "helpers/common.h"
+#include "core/fmod_channel_group.h"
 
 namespace godot {
     class FmodBus : public RefCounted {
@@ -19,6 +20,9 @@ namespace godot {
         void set_paused(bool paused) const;
         void set_volume(float volume) const;
         void stop_all_events(int stopMode);
+        Ref<FmodChannelGroup> get_channel_group() const;
+        void lock_channel_group() const;
+        void unlock_channel_group() const;
 
         protected:
             static void _bind_methods();

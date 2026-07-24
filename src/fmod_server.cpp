@@ -134,8 +134,10 @@ void FmodServer::_bind_methods() {
     ClassDB::bind_method(D_METHOD("unmute_all_events"), &FmodServer::unmute_all_events);
     ClassDB::bind_method(D_METHOD("mixer_suspend"), &FmodServer::mixer_suspend);
     ClassDB::bind_method(D_METHOD("mixer_resume"), &FmodServer::mixer_resume);
+    ClassDB::bind_method(D_METHOD("flush_commands"), &FmodServer::flush_commands);
 
     ClassDB::bind_method(D_METHOD("create_sound_instance", "path"), &FmodServer::create_sound_instance);
+    ClassDB::bind_method(D_METHOD("create_dsp_by_type", "dsp_type"), &FmodServer::create_dsp_by_type);
     REGISTER_ALL_CONSTANTS
 }
 
@@ -852,6 +854,10 @@ void FmodServer::mixer_resume() {
     ERROR_CHECK(coreSystem->mixerResume());
 }
 
+void FmodServer::flush_commands() {
+    ERROR_CHECK_WITH_REASON(system->flushCommands(), vformat("Cannot flush FMOD Studio commands"));
+}
+
 Ref<FmodFile> FmodServer::load_file_as_sound(const String& path) {
     if (cache->has_file(path)) {
         GODOT_LOG_WARNING("FMOD Sound System: FILE ALREADY LOADED AS SOUND" + String(path))
@@ -888,6 +894,16 @@ Ref<FmodSound> FmodServer::create_sound_instance(const String& path) {
     ERROR_CHECK_WITH_REASON(coreSystem->playSound(file->get_wrapped(), nullptr, true, &channel), vformat("Cannot play sound %s", path));
     if (channel) {
         Ref<FmodSound> ref = FmodSound::create_ref(channel);
+        return ref;
+    }
+    return {};
+}
+
+Ref<FmodDsp> FmodServer::create_dsp_by_type(int dsp_type) {
+    FMOD::DSP* dsp = nullptr;
+    ERROR_CHECK_WITH_REASON(coreSystem->createDSPByType(static_cast<FMOD_DSP_TYPE>(dsp_type), &dsp), vformat("Cannot create DSP of type %d", dsp_type));
+    if (dsp) {
+        Ref<FmodDsp> ref = FmodDsp::create_ref(dsp);
         return ref;
     }
     return {};

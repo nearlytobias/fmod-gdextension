@@ -12,6 +12,9 @@ void FmodBus::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_paused", "paused"), &FmodBus::set_paused);
     ClassDB::bind_method(D_METHOD("set_volume", "volume"), &FmodBus::set_volume);
     ClassDB::bind_method(D_METHOD("stop_all_events", "stopMode"), &FmodBus::stop_all_events);
+    ClassDB::bind_method(D_METHOD("get_channel_group"), &FmodBus::get_channel_group);
+    ClassDB::bind_method(D_METHOD("lock_channel_group"), &FmodBus::lock_channel_group);
+    ClassDB::bind_method(D_METHOD("unlock_channel_group"), &FmodBus::unlock_channel_group);
     ClassDB::bind_method(D_METHOD("is_valid"), &FmodBus::is_valid);
 
     ClassDB::bind_method(D_METHOD("get_path"), &FmodBus::get_path);
@@ -55,4 +58,24 @@ void FmodBus::set_volume(float volume) const {
 void FmodBus::stop_all_events(int stopMode) {
     ERROR_CHECK_WITH_REASON(_wrapped->stopAllEvents(static_cast<FMOD_STUDIO_STOP_MODE>(stopMode)),
                             vformat("Cannot stop all bus %s events", get_path()));
+}
+
+Ref<FmodChannelGroup> FmodBus::get_channel_group() const {
+    FMOD::ChannelGroup* channel_group = nullptr;
+    ERROR_CHECK_WITH_REASON(_wrapped->getChannelGroup(&channel_group), vformat("Cannot get ChannelGroup for bus %s", get_path()));
+
+    if (channel_group) {
+        Ref<FmodChannelGroup> ref = FmodChannelGroup::create_ref(channel_group);
+        return ref;
+    }
+
+    return {};
+}
+
+void FmodBus::lock_channel_group() const {
+    ERROR_CHECK_WITH_REASON(_wrapped->lockChannelGroup(), vformat("Cannot lock ChannelGroup for bus %s", get_path()));
+}
+
+void FmodBus::unlock_channel_group() const {
+    ERROR_CHECK_WITH_REASON(_wrapped->unlockChannelGroup(), vformat("Cannot unlock ChannelGroup for bus %s", get_path()));
 }

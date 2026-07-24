@@ -2,6 +2,7 @@
 #define GODOTFMOD_BIND_CONSTANTS_H
 
 #include <fmod_common.h>
+#include <fmod_dsp_effects.h>
 
 #include <core/class_db.hpp>
 
@@ -115,6 +116,27 @@
     BIND_CONSTANT(FMOD_STUDIO_PLAYBACK_STOPPED)                        \
     BIND_CONSTANT(FMOD_STUDIO_PLAYBACK_STARTING)                       \
     BIND_CONSTANT(FMOD_STUDIO_PLAYBACK_STOPPING)                       \
-    BIND_CONSTANT(FMOD_STUDIO_PLAYBACK_FORCEINT)
+    BIND_CONSTANT(FMOD_STUDIO_PLAYBACK_FORCEINT)                       \
+                                                                       \
+    BIND_CONSTANT(FMOD_DSP_TYPE_FFT)                                   \
+                                                                       \
+    BIND_CONSTANT(FMOD_CHANNELCONTROL_DSP_HEAD)                        \
+    BIND_CONSTANT(FMOD_CHANNELCONTROL_DSP_FADER)                       \
+    BIND_CONSTANT(FMOD_CHANNELCONTROL_DSP_TAIL)                        \
+                                                                       \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOWSIZE)                             \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW)                                 \
+    BIND_CONSTANT(FMOD_DSP_FFT_DOWNMIX)                                \
+    BIND_CONSTANT(FMOD_DSP_FFT_CHANNEL)                                \
+                                                                       \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_RECT)                            \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_TRIANGLE)                        \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_HAMMING)                         \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_HANNING)                         \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_BLACKMAN)                        \
+    BIND_CONSTANT(FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS)                  \
+                                                                       \
+    BIND_CONSTANT(FMOD_DSP_FFT_DOWNMIX_NONE)                           \
+    BIND_CONSTANT(FMOD_DSP_FFT_DOWNMIX_MONO)
 
 #endif// GODOTFMOD_BIND_CONSTANTS_H

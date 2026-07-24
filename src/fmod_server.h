@@ -1,6 +1,7 @@
 #ifndef GODOTFMOD_FMOD_SERVER_H
 #define GODOTFMOD_FMOD_SERVER_H
 
+#include "core/fmod_dsp.h"
 #include "core/fmod_file.h"
 #include "core/fmod_sound.h"
 #include "data/performance_data.h"
@@ -226,6 +227,9 @@ namespace godot {
         FMOD_STUDIO_SOUND_INFO get_sound_info(const String& sound_key) const;
         FMOD::Sound* create_sound(FMOD_STUDIO_SOUND_INFO& sound_info, FMOD_MODE mode) const;
 
+        // DSP
+        Ref<FmodDsp> create_dsp_by_type(int dsp_type);
+
         //CALLBACKS
         void add_callback(const Callback& callback);
 
@@ -262,6 +266,7 @@ namespace godot {
         void unmute_all_events();
         void mixer_suspend();
         void mixer_resume();
+        void flush_commands();
         void wait_for_all_loads();
 
     protected:

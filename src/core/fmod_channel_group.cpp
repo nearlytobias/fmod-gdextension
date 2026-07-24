@@ -7,6 +7,8 @@ using namespace godot;
 void FmodChannelGroup::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_dsp_clock"), &FmodChannelGroup::get_dsp_clock);
     ClassDB::bind_method(D_METHOD("get_parent_dsp_clock"), &FmodChannelGroup::get_parent_dsp_clock);
+    ClassDB::bind_method(D_METHOD("add_dsp", "index", "dsp"), &FmodChannelGroup::add_dsp);
+    ClassDB::bind_method(D_METHOD("remove_dsp", "dsp"), &FmodChannelGroup::remove_dsp);
 }
 
 
@@ -22,4 +24,14 @@ uint64_t FmodChannelGroup::get_parent_dsp_clock() const {
     unsigned long long parentclock = 0;
     ERROR_CHECK(_wrapped->getDSPClock(&dspclock, &parentclock));
     return (uint64_t) parentclock; // godot does not support unsigned ints?
+}
+
+void FmodChannelGroup::add_dsp(int index, const Ref<FmodDsp>& dsp) const {
+    if (dsp.is_null()) { return; }
+    ERROR_CHECK_WITH_REASON(_wrapped->addDSP(index, dsp->get_wrapped()), vformat("Cannot add DSP to ChannelGroup"));
+}
+
+void FmodChannelGroup::remove_dsp(const Ref<FmodDsp>& dsp) const {
+    if (dsp.is_null()) { return; }
+    ERROR_CHECK_WITH_REASON(_wrapped->removeDSP(dsp->get_wrapped()), vformat("Cannot remove DSP from ChannelGroup"));
 }
