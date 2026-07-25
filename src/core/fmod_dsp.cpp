@@ -1,4 +1,4 @@
-#include "fmod_dsp.h"
+#include "core/fmod_dsp.h"
 
 #include "callback/dsp_capture_callbacks.h"
 #include "helpers/common.h"

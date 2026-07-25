@@ -182,6 +182,16 @@ void FmodServer::init(const Ref<FmodGeneralSettings>& p_settings) {
         ERROR_CHECK(system->getCoreSystem(&coreSystem));
     }
 
+    // A header/library mismatch corrupts structs silently rather than failing loudly, so check it up front.
+    unsigned int linked_version = 0;
+    if (ERROR_CHECK(coreSystem->getVersion(&linked_version, nullptr)) && linked_version != FMOD_VERSION) {
+        GODOT_LOG_ERROR(vformat(
+          "FMOD Sound System: Version mismatch. Built against %x, linked against %x. Update the FMOD libraries to match the headers.",
+          FMOD_VERSION,
+          linked_version
+        ))
+    }
+
     // editing advanced settings to set random seed before system initialization
     FMOD_ADVANCEDSETTINGS advancedSettings = {};
     advancedSettings.cbSize = sizeof(FMOD_ADVANCEDSETTINGS);
@@ -923,6 +933,7 @@ Ref<FmodDsp> FmodServer::create_dsp_capture() {
 
     FMOD_DSP_DESCRIPTION dsp_description;
     memset(&dsp_description, 0, sizeof(dsp_description));
+    dsp_description.pluginsdkversion = FMOD_PLUGIN_SDK_VERSION;
     strncpy(dsp_description.name, "Godot Capture", sizeof(dsp_description.name) - 1);
     dsp_description.version = 0x00010000;
     dsp_description.numinputbuffers = 1;

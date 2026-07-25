@@ -3,7 +3,7 @@
 
 #include "classes/ref_counted.hpp"
 #include "fmod.hpp"
-#include "fmod_dsp.h"
+#include "core/fmod_dsp.h"
 
 namespace godot {
     class FmodChannelGroup : public RefCounted {
