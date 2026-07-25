@@ -1,3 +1,4 @@
+#include "callback/dsp_capture_callbacks.h"
 #include "classes/dir_access.hpp"
 #include "classes/engine.hpp"
 #include "classes/os.hpp"
@@ -138,6 +139,7 @@ void FmodServer::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("create_sound_instance", "path"), &FmodServer::create_sound_instance);
     ClassDB::bind_method(D_METHOD("create_dsp_by_type", "dsp_type"), &FmodServer::create_dsp_by_type);
+    ClassDB::bind_method(D_METHOD("create_dsp_capture"), &FmodServer::create_dsp_capture);
     REGISTER_ALL_CONSTANTS
 }
 
@@ -902,6 +904,33 @@ Ref<FmodSound> FmodServer::create_sound_instance(const String& path) {
 Ref<FmodDsp> FmodServer::create_dsp_by_type(int dsp_type) {
     FMOD::DSP* dsp = nullptr;
     ERROR_CHECK_WITH_REASON(coreSystem->createDSPByType(static_cast<FMOD_DSP_TYPE>(dsp_type), &dsp), vformat("Cannot create DSP of type %d", dsp_type));
+    if (dsp) {
+        Ref<FmodDsp> ref = FmodDsp::create_ref(dsp);
+        return ref;
+    }
+    return {};
+}
+
+Ref<FmodDsp> FmodServer::create_dsp_capture() {
+    FMOD_DSP_PARAMETER_DESC waveform_data_desc;
+    FMOD_DSP_INIT_PARAMDESC_DATA(waveform_data_desc, "waveform data", "", "raw waveform data", FMOD_DSP_PARAMETER_DATA_TYPE_USER);
+    FMOD_DSP_PARAMETER_DESC* paramdesc[1] = {&waveform_data_desc};
+
+    FMOD_DSP_DESCRIPTION dsp_description;
+    memset(&dsp_description, 0, sizeof(dsp_description));
+    strncpy(dsp_description.name, "Godot Waveform Capture", sizeof(dsp_description.name));
+    dsp_description.version = 0x00010000;
+    dsp_description.numinputbuffers = 1;
+    dsp_description.numoutputbuffers = 1;
+    dsp_description.create = Callbacks::dsp_capture_create;
+    dsp_description.release = Callbacks::dsp_capture_release;
+    dsp_description.read = Callbacks::dsp_capture_read;
+    dsp_description.getparameterdata = Callbacks::dsp_capture_get_parameter_data;
+    dsp_description.numparameters = 1;
+    dsp_description.paramdesc = paramdesc;
+
+    FMOD::DSP* dsp = nullptr;
+    ERROR_CHECK_WITH_REASON(coreSystem->createDSP(&dsp_description, &dsp), vformat("Cannot create waveform capture DSP"));
     if (dsp) {
         Ref<FmodDsp> ref = FmodDsp::create_ref(dsp);
         return ref;

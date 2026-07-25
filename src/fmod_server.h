@@ -229,6 +229,7 @@ namespace godot {
 
         // DSP
         Ref<FmodDsp> create_dsp_by_type(int dsp_type);
+        Ref<FmodDsp> create_dsp_capture();
 
         //CALLBACKS
         void add_callback(const Callback& callback);
