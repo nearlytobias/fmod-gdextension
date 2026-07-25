@@ -30,7 +30,8 @@ namespace godot {
         void set_parameter_int(int index, int value) const;
         int get_parameter_int(int index) const;
         PackedFloat32Array get_spectrum(int channel) const;
-        PackedFloat32Array get_waveform(int channel) const;
+        int get_capture_channels() const;
+        PackedFloat32Array get_capture_data(int channel) const;
 
     protected:
         static void _bind_methods();

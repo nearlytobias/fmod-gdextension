@@ -912,13 +912,18 @@ Ref<FmodDsp> FmodServer::create_dsp_by_type(int dsp_type) {
 }
 
 Ref<FmodDsp> FmodServer::create_dsp_capture() {
-    FMOD_DSP_PARAMETER_DESC waveform_data_desc;
-    FMOD_DSP_INIT_PARAMDESC_DATA(waveform_data_desc, "waveform data", "", "raw waveform data", FMOD_DSP_PARAMETER_DATA_TYPE_USER);
-    FMOD_DSP_PARAMETER_DESC* paramdesc[1] = {&waveform_data_desc};
+    // FMOD references paramdesc internally, so it must outlive this call.
+    static FMOD_DSP_PARAMETER_DESC capture_data_desc;
+    static FMOD_DSP_PARAMETER_DESC* paramdesc[1] = {&capture_data_desc};
+    static bool paramdesc_initialised = false;
+    if (!paramdesc_initialised) {
+        FMOD_DSP_INIT_PARAMDESC_DATA(capture_data_desc, "capture data", "", "raw captured PCM", FMOD_DSP_PARAMETER_DATA_TYPE_USER);
+        paramdesc_initialised = true;
+    }
 
     FMOD_DSP_DESCRIPTION dsp_description;
     memset(&dsp_description, 0, sizeof(dsp_description));
-    strncpy(dsp_description.name, "Godot Waveform Capture", sizeof(dsp_description.name));
+    strncpy(dsp_description.name, "Godot Capture", sizeof(dsp_description.name) - 1);
     dsp_description.version = 0x00010000;
     dsp_description.numinputbuffers = 1;
     dsp_description.numoutputbuffers = 1;
@@ -930,7 +935,7 @@ Ref<FmodDsp> FmodServer::create_dsp_capture() {
     dsp_description.paramdesc = paramdesc;
 
     FMOD::DSP* dsp = nullptr;
-    ERROR_CHECK_WITH_REASON(coreSystem->createDSP(&dsp_description, &dsp), vformat("Cannot create waveform capture DSP"));
+    ERROR_CHECK_WITH_REASON(coreSystem->createDSP(&dsp_description, &dsp), vformat("Cannot create capture DSP"));
     if (dsp) {
         Ref<FmodDsp> ref = FmodDsp::create_ref(dsp);
         return ref;
