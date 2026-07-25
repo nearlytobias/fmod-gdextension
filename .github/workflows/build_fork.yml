@@ -1,0 +1,167 @@
+name: Build Fork
+# Manually triggered builds for this fork, as the upstream workflows only
+# trigger on PRs or release tags.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        type: choice
+        options: [all, linux, windows, macos, android, ios]
+        default: all
+      target:
+        description: Target to build
+        type: choice
+        options: [all, editor, template_debug, template_release]
+        default: all
+
+# Global Settings
+env:
+  GODOT_VERSION: 4.5
+  NDK_VERSION: 28.2.13676358
+  TARGET_PATH: demo/addons/fmod/libs/
+  TARGET_NAME: libGodotFmod
+  FMOD_VERSION: 20314
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    if: >
+      (github.event.inputs.platform == 'all' || github.event.inputs.platform == matrix.platform) &&
+      (github.event.inputs.target == 'all' || github.event.inputs.target == matrix.target)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows Editor Compilation
+            os: "windows-2022"
+            platform: windows
+            target: editor
+            additional-python-packages: pywin32
+            fmod-executable-suffix: win-installer.exe
+            flags: arch=x86_64
+            shell: pwsh
+
+          - name: Windows Debug Compilation
+            os: "windows-2022"
+            platform: windows
+            target: template_debug
+            additional-python-packages: pywin32
+            fmod-executable-suffix: win-installer.exe
+            flags: arch=x86_64
+            shell: pwsh
+
+          - name: Windows Release Compilation
+            os: "windows-2022"
+            platform: windows
+            target: template_release
+            additional-python-packages: pywin32
+            fmod-executable-suffix: win-installer.exe
+            flags: arch=x86_64
+            shell: pwsh
+
+          - name: Ubuntu Editor Compilation
+            os: "ubuntu-22.04"
+            platform: linux
+            target: editor
+            fmod-executable-suffix: linux.tar.gz
+            shell: bash
+
+          - name: Ubuntu Debug Compilation
+            os: "ubuntu-22.04"
+            platform: linux
+            target: template_debug
+            fmod-executable-suffix: linux.tar.gz
+            shell: bash
+
+          - name: Ubuntu Release Compilation
+            os: "ubuntu-22.04"
+            platform: linux
+            target: template_release
+            fmod-executable-suffix: linux.tar.gz
+            shell: bash
+
+          - name: MacOS Editor Compilation
+            os: "macos-14"
+            platform: macos
+            target: editor
+            fmod-executable-suffix: osx.dmg
+            shell: bash
+
+          - name: MacOS Debug Compilation
+            os: "macos-14"
+            platform: macos
+            target: template_debug
+            fmod-executable-suffix: osx.dmg
+            shell: bash
+
+          - name: MacOS Release Compilation
+            os: "macos-14"
+            platform: macos
+            target: template_release
+            fmod-executable-suffix: osx.dmg
+            shell: bash
+
+          - name: Android Editor Compilation
+            os: "ubuntu-latest"
+            platform: android
+            target: editor
+            fmod-executable-suffix: android.tar.gz
+            flags: ndk_version=$NDK_VERSION arch=arm64
+            shell: bash
+
+          - name: Android Debug Compilation
+            os: "ubuntu-latest"
+            platform: android
+            target: template_debug
+            fmod-executable-suffix: android.tar.gz
+            flags: ndk_version=$NDK_VERSION arch=arm64
+            shell: bash
+
+          - name: Android Release Compilation
+            os: "ubuntu-latest"
+            platform: android
+            target: template_release
+            fmod-executable-suffix: android.tar.gz
+            flags: ndk_version=$NDK_VERSION arch=arm64
+            shell: bash
+
+          - name: iOS Debug Compilation
+            os: "macos-14"
+            platform: ios
+            target: template_debug
+            fmod-executable-suffix: ios.dmg
+            shell: bash
+
+          - name: iOS Release Compilation
+            os: "macos-14"
+            platform: ios
+            target: template_release
+            fmod-executable-suffix: ios.dmg
+            shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Android dependencies
+        if: ${{ matrix.platform == 'android' }}
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r23c
+          link-to-sdk: true
+
+      - name: Compile native plugin
+        uses: ./.github/actions/create-native-build
+        with:
+          platform: ${{ matrix.platform }}
+          target: ${{ matrix.target }}
+          additional-python-packages: ${{ matrix.additional-python-packages }}
+          flags: ${{ matrix.flags }}
+          fmod-executable-suffix: ${{ matrix.fmod-executable-suffix }}
+          fmod-user: ${{ secrets.FMODUSER }}
+          fmod-password: ${{ secrets.FMODPASS }}
+          shell: ${{ matrix.shell }}
